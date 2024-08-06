@@ -2,20 +2,16 @@ import torch
 import torchvision.transforms as transforms
 from torchvision import models
 from PIL import Image
-
 import numpy as np
 import os
 
 # 初始化空列表用于存储所有数据
 X_train_list = []
 y_train_list = []
-X_val_list = []
-y_val_list = []
-X_test_list = []
-y_test_list = []
 
-# 遍历 data_index 从 1 到 9
-for data_index in range(1, 10):
+
+# 遍历 data_index 从 1 到 8
+for data_index in range(1, 9):
     dataset_path = f"../../dataset/dataset_0725/p{data_index}"
     os.makedirs(dataset_path, exist_ok=True)
 
@@ -30,34 +26,62 @@ for data_index in range(1, 10):
     # 将加载的数据添加到列表中
     X_train_list.append(X_train)
     y_train_list.append(y_train)
-    X_val_list.append(X_val)
-    y_val_list.append(y_val)
-    X_test_list.append(X_test)
-    y_test_list.append(y_test)
+    X_train_list.append(X_val)
+    y_train_list.append(y_val)
+    X_train_list.append(X_test)
+    y_train_list.append(y_test)
 
 # 将列表中的数据合并到一起
 X_train = np.concatenate(X_train_list, axis=0)
 y_train = np.concatenate(y_train_list, axis=0)
-X_val = np.concatenate(X_val_list, axis=0)
-y_val = np.concatenate(y_val_list, axis=0)
-X_test = np.concatenate(X_test_list, axis=0)
-y_test = np.concatenate(y_test_list, axis=0)
+
 
 # 打印合并后数据的形状
 print(f'X_train shape: {X_train.shape}')
 print(f'y_train shape: {y_train.shape}')
+
+import numpy as np
+import os
+
+# 初始化空列表用于存储所有数据
+X_val_list = []
+y_val_list = []
+X_test_list = []
+y_test_list = []
+
+# 遍历 data_index 9
+for data_index in range(9, 10):
+    dataset_path = f"../../dataset/dataset_0725/p{data_index}"
+    os.makedirs(dataset_path, exist_ok=True)
+
+    # 加载数据
+    X_train = np.load(f'{dataset_path}/X_train.npy')
+    y_train = np.load(f'{dataset_path}/y_train.npy').astype(float).flatten()
+    X_val = np.load(f'{dataset_path}/X_val.npy')
+    y_val = np.load(f'{dataset_path}/y_val.npy').astype(float).flatten()
+    X_test = np.load(f'{dataset_path}/X_test.npy')
+    y_test = np.load(f'{dataset_path}/y_test.npy').astype(float).flatten()
+
+    # 将加载的数据添加到列表中
+    X_val_list.append(X_train)
+    y_val_list.append(y_train)
+    X_val_list.append(X_val)
+    y_val_list.append(y_val)
+    X_val_list.append(X_test)
+    y_val_list.append(y_test)
+
+# 将列表中的数据合并到一起
+X_val = np.concatenate(X_val_list, axis=0)
+y_val = np.concatenate(y_val_list, axis=0)
+# 打印合并后数据的形状
 print(f'X_val shape: {X_val.shape}')
 print(f'y_val shape: {y_val.shape}')
-print(f'X_test shape: {X_test.shape}')
-print(f'y_test shape: {y_test.shape}')
-
-saveModel_dir = f'../../savedModel/combined9'
+saveModel_dir = f'../../savedModel/combined8split1'
 os.makedirs(saveModel_dir, exist_ok=True)
-results_dir = f'../../saveResult/combined9'
+results_dir = f'../../saveResult/combined8split1'
 os.makedirs(results_dir, exist_ok=True)
-saveplot_dir = f'../../savePlot/combined9'
+saveplot_dir = f'../../savePlot/combined8split1'
 os.makedirs(saveplot_dir, exist_ok=True)
-
 import numpy as np
 import torch
 import torch.nn as nn
@@ -121,10 +145,10 @@ def calculate_custom_accuracy(predictions, targets, tolerance=0.1):
 
 # learning_rates = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6]
 learning_rates = [ 1e-2, 1e-3, 1e-4, 1e-5]
+# learning_rates = [  1e-3, 1e-4]
 num_epochs = 2000
 
 results = {}
-
 import os
 
 # 定义保存模型的目录
