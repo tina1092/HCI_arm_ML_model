@@ -146,7 +146,7 @@ def calculate_custom_accuracy(predictions, targets, tolerance=0.1):
 # learning_rates = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6]
 learning_rates = [ 1e-2, 1e-3, 1e-4, 1e-5]
 # learning_rates = [  1e-3, 1e-4]
-num_epochs = 2000
+num_epochs = 1000
 
 results = {}
 import os
@@ -168,6 +168,7 @@ def save_checkpoint(model, optimizer, epoch, val_accuracy, val_loss, file_path):
     torch.save(checkpoint, file_path)
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print(device)
 
 for lr in learning_rates:
     print(f"Training with learning rate: {lr}")
