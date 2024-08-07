@@ -137,8 +137,8 @@ class RNNModel(nn.Module):
 
 # 定义自定义的准确率函数
 def calculate_custom_accuracy(predictions, targets, tolerance=0.1):
-    predictions = predictions.detach().cpu().numpy()
-    targets = targets.detach().cpu().numpy()
+    predictions = predictions#.detach().cpu().numpy()
+    targets = targets#.detach().cpu().numpy()
     correct = np.abs(predictions - targets) < tolerance
     accuracy = np.mean(correct)
     return accuracy
@@ -212,14 +212,14 @@ for lr in learning_rates:
             
             running_loss += loss.item() * inputs.size(0)
             
-            all_predictions_train.append(outputs)
-            all_labels_train.append(labels.unsqueeze(1))
+            all_predictions_train.append(outputs.detach().cpu().numpy())
+            all_labels_train.append(labels.unsqueeze(1).detach().cpu().numpy())
         
         epoch_loss = running_loss / len(train_loader.dataset)
         train_losses.append(epoch_loss)
         
-        all_predictions_train = torch.cat(all_predictions_train, dim=0)
-        all_labels_train = torch.cat(all_labels_train, dim=0)
+        all_predictions_train = np.concatenate(all_predictions_train, axis=0)
+        all_labels_train = np.concatenate(all_labels_train, axis=0)
 
         train_output_result.append(all_predictions_train)
         train_true_result.append(all_labels_train)
@@ -242,14 +242,14 @@ for lr in learning_rates:
                 loss = criterion(outputs, labels.unsqueeze(1))  # 将标签调整为 (batch_size, 1)
                 val_loss += loss.item() * inputs.size(0)
                 
-                all_predictions.append(outputs)
-                all_labels.append(labels.unsqueeze(1))
+                all_predictions.append(outputs.detach().cpu().numpy())
+                all_labels.append(labels.unsqueeze(1).detach().cpu().numpy())
         
         val_loss /= len(val_loader.dataset)
         val_losses.append(val_loss)
         
-        all_predictions = torch.cat(all_predictions, dim=0)
-        all_labels = torch.cat(all_labels, dim=0)
+        all_predictions = np.concatenate(all_predictions, axis=0)
+        all_labels = np.concatenate(all_labels, axis=0)
 
         val_output_result.append(all_predictions)
         val_true_result.append(all_labels)
