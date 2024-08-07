@@ -1,2 +1,5 @@
 original_resource/
 processed_data/
+*/.DS_Store
+.DS_Store
+dataset/.DS_Store
