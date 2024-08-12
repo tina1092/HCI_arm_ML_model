@@ -4,123 +4,19 @@ from torchvision import models
 from PIL import Image
 import numpy as np
 import os
-
-# 初始化空列表用于存储所有数据
-X_train_list = []
-y_train_list = []
-
-
-# 遍历 data_index 从 1 到 8
-for data_index in range(1, 9):
-    dataset_path = f"../../dataset/dataset_0725/p{data_index}"
-    os.makedirs(dataset_path, exist_ok=True)
-
-    # 加载数据
-    X_train = np.load(f'{dataset_path}/X_train.npy')
-    y_train = np.load(f'{dataset_path}/y_train.npy').astype(float).flatten()
-    X_val = np.load(f'{dataset_path}/X_val.npy')
-    y_val = np.load(f'{dataset_path}/y_val.npy').astype(float).flatten()
-    X_test = np.load(f'{dataset_path}/X_test.npy')
-    y_test = np.load(f'{dataset_path}/y_test.npy').astype(float).flatten()
-
-    # 将加载的数据添加到列表中
-    X_train_list.append(X_train)
-    y_train_list.append(y_train)
-    X_train_list.append(X_val)
-    y_train_list.append(y_val)
-    X_train_list.append(X_test)
-    y_train_list.append(y_test)
-
-# 将列表中的数据合并到一起
-X_train = np.concatenate(X_train_list, axis=0)
-y_train = np.concatenate(y_train_list, axis=0)
-
-
-# 打印合并后数据的形状
-print(f'X_train shape: {X_train.shape}')
-print(f'y_train shape: {y_train.shape}')
-
-import numpy as np
-import os
-
-# 初始化空列表用于存储所有数据
-X_val_list = []
-y_val_list = []
-X_test_list = []
-y_test_list = []
-
-# 遍历 data_index 9
-for data_index in range(9, 10):
-    dataset_path = f"../../dataset/dataset_0725/p{data_index}"
-    os.makedirs(dataset_path, exist_ok=True)
-
-    # 加载数据
-    X_train = np.load(f'{dataset_path}/X_train.npy')
-    y_train = np.load(f'{dataset_path}/y_train.npy').astype(float).flatten()
-    X_val = np.load(f'{dataset_path}/X_val.npy')
-    y_val = np.load(f'{dataset_path}/y_val.npy').astype(float).flatten()
-    X_test = np.load(f'{dataset_path}/X_test.npy')
-    y_test = np.load(f'{dataset_path}/y_test.npy').astype(float).flatten()
-
-    # 将加载的数据添加到列表中
-    X_val_list.append(X_train)
-    y_val_list.append(y_train)
-    X_val_list.append(X_val)
-    y_val_list.append(y_val)
-    X_val_list.append(X_test)
-    y_val_list.append(y_test)
-
-# 将列表中的数据合并到一起
-X_val = np.concatenate(X_val_list, axis=0)
-y_val = np.concatenate(y_val_list, axis=0)
-# 打印合并后数据的形状
-print(f'X_val shape: {X_val.shape}')
-print(f'y_val shape: {y_val.shape}')
-saveModel_dir = f'../../savedModel/combined8split1_l9'
-os.makedirs(saveModel_dir, exist_ok=True)
-results_dir = f'../../saveResult/combined8split1_l9'
-os.makedirs(results_dir, exist_ok=True)
-saveplot_dir = f'../../savePlot/combined8split1_l9'
-os.makedirs(saveplot_dir, exist_ok=True)
-import numpy as np
-import torch
 import torch.nn as nn
 import torch.optim as optim
 from torch.utils.data import DataLoader, TensorDataset
 import matplotlib.pyplot as plt
 import random
 from tqdm import tqdm
+import glob
+import pandas as pd
+from sklearn.model_selection import train_test_split
 
-# 假设 X_train, y_train, X_val, y_val, X_test, y_test 数据已经存在
-seed = 42
-random.seed(seed)
-torch.manual_seed(seed)
 
-# 将数据转换为 PyTorch 张量
-X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
-y_train_tensor = torch.tensor(y_train, dtype=torch.float32)
-X_val_tensor = torch.tensor(X_val, dtype=torch.float32)
-y_val_tensor = torch.tensor(y_val, dtype=torch.float32)
-X_test_tensor = torch.tensor(X_test, dtype=torch.float32)
-y_test_tensor = torch.tensor(y_test, dtype=torch.float32)
 
-# 数据归一化
-mean = X_train_tensor.mean(dim=0, keepdim=True)
-std = X_train_tensor.std(dim=0, keepdim=True)
-X_train_tensor = (X_train_tensor - mean) / std
-X_val_tensor = (X_val_tensor - mean) / std
-X_test_tensor = (X_test_tensor - mean) / std
 
-# 创建数据加载器
-train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
-val_dataset = TensorDataset(X_val_tensor, y_val_tensor)
-test_dataset = TensorDataset(X_test_tensor, y_test_tensor)
-
-train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
-val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
-test_loader = DataLoader(test_dataset, batch_size=32, shuffle=False)
-
-# 定义 RNN 回归模型
 class RNNModel(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers):
         super(RNNModel, self).__init__()
@@ -135,27 +31,18 @@ class RNNModel(nn.Module):
         out = self.fc(out[:, -1, :])
         return out
 
-# 定义自定义的准确率函数
-def calculate_custom_accuracy(predictions, targets, tolerance=0.1):
+
+
+
+def calculate_custom_accuracy(predictions, targets, tolerance=0.5):
     predictions = predictions#.detach().cpu().numpy()
     targets = targets#.detach().cpu().numpy()
     correct = np.abs(predictions - targets) < tolerance
     accuracy = np.mean(correct)
     return accuracy
 
-# learning_rates = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6]
-# learning_rates = [ 1e-2, 1e-3, 1e-4, 1e-5]
-learning_rates = [  1e-3 ]
-num_epochs = 4000
-
-results = {}
-import os
-
-# 定义保存模型的目录
 
 
-
-# 定义保存模型的函数
 def save_checkpoint(model, optimizer, epoch, val_accuracy, val_loss, file_path):
     
     checkpoint = {
@@ -166,6 +53,105 @@ def save_checkpoint(model, optimizer, epoch, val_accuracy, val_loss, file_path):
         'val_loss': val_loss
     }
     torch.save(checkpoint, file_path)
+
+def read_data(user_list):
+  file_pattern = '../../dataset/dataset_txt/p*.txt'
+  files = glob.glob(file_pattern)
+  real_parts = []
+  imaginary_parts = []
+  pinch_pressure = []
+  user_ids = []
+  data = {
+      'Real Parts': real_parts,
+      'Imaginary Parts': imaginary_parts,
+      'Pinch Pressure': pinch_pressure,
+      'User ID': user_ids  # Assuming each file corresponds to a different user
+  }
+
+
+  for file in files:
+    user_id = int(os.path.basename(file).split('-')[0][1:])
+
+    if user_id not in user_list:
+      continue
+    with open(file, mode='r') as f:
+        lines = f.readlines()
+
+        for i in range(4, len(lines), 4):
+            if 'frame' in lines[i]:
+                real_parts.append([float(val) for val in lines[i+1].strip().split()])
+                imaginary_parts.append([float(val) for val in lines[i+2].strip().split()])
+                pinch_pressure.append(float(lines[i+3].strip().split()[0]))
+                user_ids.append(user_id)  # Assigning the user ID to each data point
+
+  # Create a DataFrame
+  df = pd.DataFrame(data)
+  X = np.hstack((df['Real Parts'].tolist(), df['Imaginary Parts'].tolist()))
+  # X = X.reshape(-1, 2, 6)
+  y = df['Pinch Pressure'].values
+
+  return X, y 
+
+
+# Read Data
+X_total, y_total = read_data(list(range(1,21)))
+X_train, X_val, y_train, y_val = train_test_split(X_total, y_total, test_size=0.2, random_state=42)
+
+mean = np.mean(X_train, axis=0, keepdims=True)
+std = np.std(X_train, axis=0, keepdims=True)
+X_train = (X_train - mean) / std
+X_val = (X_val - mean) / std
+
+print(f'X_train shape: {X_train.shape}')
+print(f'y_train shape: {y_train.shape}')
+print(f'X_val shape: {X_val.shape}')
+print(f'y_val shape: {y_val.shape}')
+
+filename = 'combine20_8train_2valid'
+
+saveModel_dir = f'../../savedModel/{filename}'
+os.makedirs(saveModel_dir, exist_ok=True)
+results_dir = f'../../saveResult/{filename}'
+os.makedirs(results_dir, exist_ok=True)
+saveplot_dir = f'../../savePlot/{filename}'
+os.makedirs(saveplot_dir, exist_ok=True)
+
+
+# 假设 X_train, y_train, X_val, y_val, X_test, y_test 数据已经存在
+seed = 42
+random.seed(seed)
+torch.manual_seed(seed)
+
+# 将数据转换为 PyTorch 张量
+X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
+y_train_tensor = torch.tensor(y_train, dtype=torch.float32)
+X_val_tensor = torch.tensor(X_val, dtype=torch.float32)
+y_val_tensor = torch.tensor(y_val, dtype=torch.float32)
+
+# 数据归一化
+mean = X_train_tensor.mean(dim=0, keepdim=True)
+std = X_train_tensor.std(dim=0, keepdim=True)
+X_train_tensor = (X_train_tensor - mean) / std
+X_val_tensor = (X_val_tensor - mean) / std
+
+# 创建数据加载器
+train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
+val_dataset = TensorDataset(X_val_tensor, y_val_tensor)
+
+train_loader = DataLoader(train_dataset, batch_size=32, shuffle=True)
+val_loader = DataLoader(val_dataset, batch_size=32, shuffle=False)
+
+
+# learning_rates = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6]
+# learning_rates = [ 1e-2, 1e-3, 1e-4, 1e-5]
+learning_rates = [  1e-3 ]
+num_epochs = 4000
+
+results = {}
+
+# 定义保存模型的目录
+
+
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 print(device)
@@ -301,12 +287,8 @@ for lr in learning_rates:
         'val_true_result': val_true_result
     }
 
-    import os
-
 # 创建保存图片的目录
 
-
-# 绘制图表
 for lr, result in results.items():
     epochs = range(1, num_epochs + 1)
     
