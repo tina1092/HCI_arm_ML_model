@@ -13,7 +13,7 @@ from tqdm import tqdm
 import glob
 import pandas as pd
 
-# 定义 RNN 回归模型
+
 class RNNModel(nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim, num_layers):
         super(RNNModel, self).__init__()
@@ -30,7 +30,7 @@ class RNNModel(nn.Module):
 
 
 
-# 定义自定义的准确率函数
+
 def calculate_custom_accuracy(predictions, targets, tolerance=0.5):
     predictions = predictions#.detach().cpu().numpy()
     targets = targets#.detach().cpu().numpy()
@@ -39,7 +39,7 @@ def calculate_custom_accuracy(predictions, targets, tolerance=0.5):
     return accuracy
 
 
-# 定义保存模型的函数
+
 def save_checkpoint(model, optimizer, epoch, val_accuracy, val_loss, file_path):
     
     checkpoint = {
@@ -111,24 +111,24 @@ saveplot_dir = f'../../savePlot/torch-vs-flow'
 os.makedirs(saveplot_dir, exist_ok=True)
 
 
-# 假设 X_train, y_train, X_val, y_val, X_test, y_test 数据已经存在
+
 seed = 42
 random.seed(seed)
 torch.manual_seed(seed)
 
-# 将数据转换为 PyTorch 张量
+
 X_train_tensor = torch.tensor(X_train, dtype=torch.float32)
 y_train_tensor = torch.tensor(y_train, dtype=torch.float32)
 X_val_tensor = torch.tensor(X_val, dtype=torch.float32)
 y_val_tensor = torch.tensor(y_val, dtype=torch.float32)
 
-# 数据归一化
+
 mean = X_train_tensor.mean(dim=0, keepdim=True)
 std = X_train_tensor.std(dim=0, keepdim=True)
 X_train_tensor = (X_train_tensor - mean) / std
 X_val_tensor = (X_val_tensor - mean) / std
 
-# 创建数据加载器
+
 train_dataset = TensorDataset(X_train_tensor, y_train_tensor)
 val_dataset = TensorDataset(X_val_tensor, y_val_tensor)
 
@@ -143,7 +143,7 @@ num_epochs = 100
 
 results = {}
 
-# 定义保存模型的目录
+
 
 
 
@@ -181,12 +181,12 @@ for lr in learning_rates:
         for inputs, labels in train_loader:
             inputs, labels = inputs.to(device), labels.to(device)
             
-            inputs = inputs.unsqueeze(1)  # 调整维度为 (batch_size, seq_length, input_dim)
+            inputs = inputs.unsqueeze(1)  
             
             optimizer.zero_grad()
             outputs = model(inputs)
             
-            loss = criterion(outputs, labels.unsqueeze(1))  # 将标签调整为 (batch_size, 1)
+            loss = criterion(outputs, labels.unsqueeze(1))  
             loss.backward()
             optimizer.step()
             
@@ -216,10 +216,10 @@ for lr in learning_rates:
             for inputs, labels in val_loader:
                 inputs, labels = inputs.to(device), labels.to(device)
                 
-                inputs = inputs.unsqueeze(1)  # 调整维度为 (batch_size, seq_length, input_dim)
+                inputs = inputs.unsqueeze(1)  
                 
                 outputs = model(inputs)
-                loss = criterion(outputs, labels.unsqueeze(1))  # 将标签调整为 (batch_size, 1)
+                loss = criterion(outputs, labels.unsqueeze(1))  
                 val_loss += loss.item() * inputs.size(0)
                 
                 all_predictions.append(outputs.detach().cpu().numpy())
@@ -237,29 +237,29 @@ for lr in learning_rates:
         val_accuracy = calculate_custom_accuracy(all_predictions, all_labels, tolerance=0.5)
         val_accuracies.append(val_accuracy)
         
-        # 记录最好的准确率和最低的损失
+
         if val_accuracy > best_val_accuracy:
             best_val_accuracy = val_accuracy
             best_val_accuracy_epoch = epoch + 1
-            # 保存模型
+
             save_checkpoint(model, optimizer, epoch + 1, val_accuracy, val_loss, os.path.join(saveModel_dir, f"best_val_accuracy_lr_{lr}.pt"))
         
         if val_loss < lowest_val_loss:
             lowest_val_loss = val_loss
             lowest_val_loss_epoch = epoch + 1
-            # 保存模型
+
             save_checkpoint(model, optimizer, epoch + 1, val_accuracy, val_loss, os.path.join(saveModel_dir, f"lowest_val_loss_lr_{lr}.pt"))
         
         if train_accuracy > best_train_accuracy:
             best_train_accuracy = train_accuracy
             best_train_accuracy_epoch = epoch + 1
-            # 保存模型
+
             save_checkpoint(model, optimizer, epoch + 1, train_accuracy, epoch_loss, os.path.join(saveModel_dir, f"best_train_accuracy_lr_{lr}.pt"))
         
         if epoch_loss < lowest_train_loss:
             lowest_train_loss = epoch_loss
             lowest_train_loss_epoch = epoch + 1
-            # 保存模型
+
             save_checkpoint(model, optimizer, epoch + 1, train_accuracy, epoch_loss, os.path.join(saveModel_dir, f"lowest_train_loss_lr_{lr}.pt"))
 
     results[lr] = {
@@ -281,10 +281,7 @@ for lr in learning_rates:
         'val_true_result': val_true_result
     }
 
-# 创建保存图片的目录
 
-
-# 绘制图表
 for lr, result in results.items():
     epochs = range(1, num_epochs + 1)
     
@@ -309,17 +306,17 @@ for lr, result in results.items():
     
     plt.tight_layout()
     
-    # 保存图片
+
     plot_filename = os.path.join(saveplot_dir, f'training_validation_lr_{lr}.png')
     plt.savefig(plot_filename)
     
-    # 显示图片
+
     plt.show()
-# 定义保存文件的路径
+
 results_file = 'training_results.txt'
 
 os.makedirs(results_dir, exist_ok=True)
-# 打开文件写入模式
+
 with open(f'{results_dir}/{results_file}', 'w') as f:
     for lr, result in results.items():
         f.write(f"Learning rate: {lr}\n")
