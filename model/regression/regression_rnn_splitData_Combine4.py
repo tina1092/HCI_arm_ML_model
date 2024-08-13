@@ -121,7 +121,7 @@ def calculate_custom_accuracy(predictions, targets, tolerance=0.1):
 
 # learning_rates = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6]
 learning_rates = [ 1e-2, 1e-3]
-num_epochs = 4000gi
+num_epochs = 4000
 
 results = {}
 

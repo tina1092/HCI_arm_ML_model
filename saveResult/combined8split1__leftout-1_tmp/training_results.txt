@@ -1,0 +1,6 @@
+Learning rate: 0.001
+Best Validation Accuracy: 0.1211 at epoch 84
+Lowest Validation Loss: 12.1455 at epoch 4
+Best Training Accuracy: 0.5438 at epoch 100
+Lowest Training Loss: 0.9830 at epoch 100
+

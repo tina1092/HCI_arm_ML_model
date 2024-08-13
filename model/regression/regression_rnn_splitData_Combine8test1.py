@@ -76,11 +76,11 @@ y_val = np.concatenate(y_val_list, axis=0)
 # 打印合并后数据的形状
 print(f'X_val shape: {X_val.shape}')
 print(f'y_val shape: {y_val.shape}')
-saveModel_dir = f'../../savedModel/combined8split1'
+saveModel_dir = f'../../savedModel/combined8split1_l9'
 os.makedirs(saveModel_dir, exist_ok=True)
-results_dir = f'../../saveResult/combined8split1'
+results_dir = f'../../saveResult/combined8split1_l9'
 os.makedirs(results_dir, exist_ok=True)
-saveplot_dir = f'../../savePlot/combined8split1'
+saveplot_dir = f'../../savePlot/combined8split1_l9'
 os.makedirs(saveplot_dir, exist_ok=True)
 import numpy as np
 import torch
@@ -144,9 +144,9 @@ def calculate_custom_accuracy(predictions, targets, tolerance=0.1):
     return accuracy
 
 # learning_rates = [1e-1, 1e-2, 1e-3, 1e-4, 1e-5, 1e-6]
-learning_rates = [ 1e-2, 1e-3, 1e-4, 1e-5]
-# learning_rates = [  1e-3, 1e-4]
-num_epochs = 1000
+# learning_rates = [ 1e-2, 1e-3, 1e-4, 1e-5]
+learning_rates = [  1e-3 ]
+num_epochs = 4000
 
 results = {}
 import os
